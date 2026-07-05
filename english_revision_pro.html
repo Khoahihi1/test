@@ -1,0 +1,1038 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+<title>English Revision Pro</title>
+<style>
+  :root {
+    --primary: #16a34a;
+    --primary-dark: #15803d;
+    --bg: #f0fdf4;
+    --card: #ffffff;
+    --text: #1f2937;
+    --muted: #6b7280;
+    --border: #e5e7eb;
+    --ok-bg: #dcfce7; --ok-border: #22c55e; --ok-text: #166534;
+    --bad-bg: #fee2e2; --bad-border: #ef4444; --bad-text: #991b1b;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: var(--bg); color: var(--text); line-height: 1.55; padding-bottom: 90px;
+  }
+  .header {
+    position: sticky; top: 0; z-index: 50; background: #fff;
+    box-shadow: 0 2px 6px rgba(0,0,0,.08); padding: 10px 14px;
+  }
+  .header-top { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+  .header h1 { margin: 0; font-size: 1.05rem; color: var(--primary); font-weight: 700; }
+  .timer {
+    font-weight: 700; color: var(--bad-text); background: var(--bad-bg);
+    padding: 4px 10px; border-radius: 8px; font-size: .9rem; display: none;
+  }
+  .tabbar { display: flex; gap: 6px; margin-top: 8px; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .tabbar::-webkit-scrollbar { display: none; }
+  .tab-group { display: flex; background: #f3f4f6; border-radius: 8px; padding: 3px; flex-shrink: 0; }
+  .tab-btn {
+    border: none; background: transparent; padding: 7px 12px; border-radius: 6px;
+    font-weight: 600; font-size: .82rem; color: var(--muted); white-space: nowrap;
+  }
+  .tab-btn.active { background: #fff; color: var(--primary); box-shadow: 0 1px 3px rgba(0,0,0,.12); }
+
+  .container { max-width: 720px; margin: 0 auto; padding: 12px 10px 40px; }
+
+  .part-title {
+    font-size: 1.05rem; color: #fff; background: var(--primary);
+    padding: 10px 14px; border-radius: 10px; margin: 22px 0 10px;
+    font-weight: 700;
+  }
+  .part-title:first-child { margin-top: 4px; }
+
+  .passage {
+    background: #fff; padding: 14px; border-radius: 10px; border-left: 4px solid var(--primary);
+    box-shadow: 0 1px 3px rgba(0,0,0,.05); margin-bottom: 12px; font-size: .95rem; color: #4b5563;
+  }
+  .p3-intro {
+    background: #fff; padding: 12px 14px; border-radius: 10px; border-left: 4px solid var(--primary);
+    margin-bottom: 12px; font-size: .92rem; font-style: italic; color: #4b5563;
+  }
+
+  .q-card {
+    background: #fff; padding: 14px; border-radius: 12px; margin-bottom: 12px;
+    box-shadow: 0 1px 4px rgba(0,0,0,.06); border: 1px solid var(--border);
+  }
+  .q-text { font-weight: 700; font-size: .98rem; margin-bottom: 10px; }
+  .q-num { color: var(--primary); }
+
+  .opt {
+    display: flex; align-items: flex-start; gap: 10px; padding: 10px 12px;
+    border: 2px solid var(--border); border-radius: 9px; margin-bottom: 7px;
+    cursor: pointer; font-size: .92rem; background: #fff; transition: .15s;
+  }
+  .opt:active { background: #f9fafb; }
+  .opt .letter {
+    flex-shrink: 0; width: 22px; height: 22px; border-radius: 50%; background: #f3f4f6;
+    display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: .78rem;
+  }
+  .opt.disabled { pointer-events: none; }
+  .opt.correct-mark { background: var(--ok-bg); border-color: var(--ok-border); color: var(--ok-text); }
+  .opt.wrong-mark { background: var(--bad-bg); border-color: var(--bad-border); color: var(--bad-text); }
+  .opt.revealed { background: var(--ok-bg); border-color: var(--ok-border); color: var(--ok-text); font-weight: 600; }
+
+  .revealed-mode .opt { pointer-events: none; }
+
+  select.dropdown-ans {
+    width: 100%; padding: 11px; border-radius: 9px; border: 2px solid var(--border);
+    font-size: .9rem; background: #fff; color: var(--text); margin-top: 4px;
+  }
+  input.text-input {
+    width: 100%; padding: 11px; border-radius: 9px; border: 2px solid var(--border);
+    font-size: .95rem; margin-top: 4px;
+  }
+
+  .ans-box {
+    margin-top: 10px; padding: 10px 12px; background: var(--ok-bg); color: var(--ok-text);
+    border: 1px dashed var(--ok-border); border-radius: 8px; font-weight: 700; font-size: .88rem;
+    display: none;
+  }
+  .ans-box.show { display: block; }
+
+  .btn-mini {
+    background: #6b7280; color: #fff; border: none; padding: 7px 12px; border-radius: 7px;
+    font-size: .82rem; font-weight: 600; margin-top: 8px;
+  }
+
+  .match-options-box {
+    background: #f9fafb; border: 1px solid var(--border); border-radius: 9px; padding: 10px 12px;
+    margin-bottom: 14px; font-size: .85rem; color: var(--muted);
+  }
+  .match-options-box .opt-line { margin: 3px 0; }
+  .match-options-box .opt-line b { color: var(--text); }
+
+  .floating-controls {
+    position: fixed; bottom: 14px; left: 0; right: 0; display: flex; justify-content: center;
+    gap: 10px; z-index: 60; padding: 0 12px;
+  }
+  .floating-btn {
+    background: #fff; border: 1px solid var(--border); padding: 10px 16px; border-radius: 24px;
+    font-weight: 700; font-size: .82rem; box-shadow: 0 3px 10px rgba(0,0,0,.15); color: var(--text);
+  }
+  .floating-btn.active { background: var(--primary); color: #fff; border-color: var(--primary); }
+  .floating-btn.reset { color: var(--bad-text); }
+
+  .btn-submit {
+    display: none; position: fixed; bottom: 14px; left: 50%; transform: translateX(-50%);
+    background: var(--primary); color: #fff; border: none; padding: 13px 32px; border-radius: 26px;
+    font-weight: 700; font-size: .95rem; box-shadow: 0 4px 14px rgba(0,0,0,.2); z-index: 60;
+  }
+
+  .overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.5); z-index: 90; }
+  .modal {
+    display: none; position: fixed; z-index: 91; top: 50%; left: 50%; transform: translate(-50%,-50%);
+    background: #fff; padding: 26px 22px; border-radius: 16px; text-align: center; width: 86%; max-width: 320px;
+  }
+  .modal h2 { margin: 0 0 8px; color: var(--primary); }
+  .modal .score { font-size: 2rem; font-weight: 800; margin: 10px 0; }
+  .modal button {
+    background: var(--primary); color: #fff; border: none; padding: 10px 26px; border-radius: 20px;
+    font-weight: 700; margin-top: 8px;
+  }
+
+  @media (min-width: 640px) {
+    .header { padding: 14px 24px; }
+    .header h1 { font-size: 1.3rem; }
+    .container { padding: 20px 16px 50px; }
+    .q-text { font-size: 1.05rem; }
+    .opt { font-size: .98rem; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-top">
+    <h1>📘 English Revision Pro</h1>
+    <span class="timer" id="timer">45:00</span>
+  </div>
+  <div class="tabbar">
+    <div class="tab-group" id="skill-group">
+      <button class="tab-btn active" id="btn-reading" onclick="setSkill('reading')">Reading</button>
+      <button class="tab-btn" id="btn-listening" onclick="setSkill('listening')">Listening</button>
+    </div>
+    <div class="tab-group" id="test-group"></div>
+    <div class="tab-group">
+      <button class="tab-btn active" id="btn-practice" onclick="setMode('practice')">Luyện tập</button>
+      <button class="tab-btn" id="btn-test" onclick="setMode('test')">Thi thử</button>
+    </div>
+  </div>
+</div>
+
+<div class="container" id="quiz-container"></div>
+
+<div class="floating-controls" id="floating-controls">
+  <button class="floating-btn reset" onclick="resetAllAnswers()">🔄 Làm lại</button>
+  <button class="floating-btn" id="btn-toggle-answers" onclick="toggleAllAnswers()">👁️ Xem đáp án</button>
+</div>
+
+<button class="btn-submit" id="btn-submit" onclick="submitTest()">✅ Nộp bài</button>
+
+<div class="overlay" id="overlay"></div>
+<div class="modal" id="modal">
+  <h2>Kết quả</h2>
+  <div class="score" id="score-text">0 / 0</div>
+  <div id="score-detail" style="color:var(--muted); font-size:.85rem;"></div>
+  <button onclick="closeModal()">Đóng</button>
+</div>
+
+<script>
+const EXAM_DATA = {
+  reading: {
+    1: {
+      part1: [
+        { q: "What is Timo worried about?", opts: ["The tickets they bought for the match cost too much.","The weather may be too bad for them to get to the match.","They could lose the money they spent on tickets."], correct: 2 },
+        { q: "Which is true?", opts: ["The journey by bus will take them as long as the one by train.","They can be on a bus before the first train leaves the station.","They'll arrive at the same time whether they go by bus or train."], correct: 2 },
+        { q: "Delivery notice:", opts: ["Anything you order will be delivered within five days for no charge.","There is a faster delivery option for customers willing to pay more.","If you spend more than £30 today, items will be delivered for free tomorrow."], correct: 1 },
+        { q: "Supermarket notice:", opts: ["The ingredients on the recipe cards are sold at a discount.","The supermarket is giving customers ideas for new dishes.","People can buy interesting meals from the supermarket this week."], correct: 1 },
+        { q: "Note about Jo:", opts: ["Jo should contact someone else for a lift tonight.","Alice can't attend the gym class next week.","Kim will go to the class with Lucy instead of Jo."], correct: 0 }
+      ],
+      part2: {
+        people: [
+          { name: "6. Jing", desc: "wants to find a website that has information on local concerts. She'd like to do online music quizzes and also watch videos which teach you how to play different instruments." },
+          { name: "7. Hans", desc: "would like to read interviews with musicians and be able to upload videos of his band onto the website. He's also looking for adverts for second-hand guitars." },
+          { name: "8. Precious", desc: "would like a website where she can find out about piano lessons in her area. She also wants information on music from around the world, and reviews of artists' new recordings." },
+          { name: "9. Antonio", desc: "wants to read about the history of music and get advice on improving his singing skills. He'd like to find information about shops selling instruments near where he lives." },
+          { name: "10. Nikoleta", desc: "wants a site that focuses on very old music. She'd also like to learn how to read music, and be able to chat online with music lovers like herself." }
+        ],
+        options: [
+          { key: "A", text: "musicandme.net" }, { key: "B", text: "musixyes.net" }, { key: "C", text: "musicnotes.net" },
+          { key: "D", text: "deepmusic.net" }, { key: "E", text: "musictolistento.com" }, { key: "F", text: "musicismusic.net" },
+          { key: "G", text: "soundwaves.net" }, { key: "H", text: "songsandtunes.net" }
+        ],
+        answers: ["D","H","E","B","F"]
+      },
+      part3: [
+        { q: "Why did Robert decide to start working as a weekend tour guide?", opts: ["to have more fun in his life","to see his city in the same way tourists did","to help pay for his studies","to show visitors how wonderful his city is"], correct: 2 },
+        { q: "What does Robert say about becoming a full-time tour guide?", opts: ["He already had all the knowledge he required.","He was surprised to discover what was involved.","He was afraid some tourists' questions might be too difficult.","He found it quite easy to get a licence."], correct: 1 },
+        { q: "What does Robert feel is the most important part of his job?", opts: ["checking that nobody gets lost during the tour","solving the tourists' problems","giving tourists all the details of any changes","dealing with unexpected events during a tour"], correct: 3 },
+        { q: "What does Robert say about the reviews he receives?", opts: ["They affect how many people choose his tours.","His customers always enjoy reading them.","They show his tours are the most popular in Chicago.","They help him plan better tours for future visitors."], correct: 0 },
+        { q: "What would be a good introduction to this text?", opts: ["Robert Allen tells us about what he did to achieve his childhood ambition.","Robert Allen talks about what happened when he moved to Chicago.","Robert Allen describes how his love of tour guiding developed into a career.","Robert Allen explains why it's particularly hard to become a city tour guide in Chicago."], correct: 2 }
+      ],
+      part4: {
+        passage: "As an underwater photo-journalist, I've spent thousands of hours taking photographs beneath the ocean waves, and producing pictures and articles for magazines and TV. My work's taken me to many countries, where I've photographed and written about some of the most amazing ocean animals that exist. Being an underwater photo-journalist, however, isn't just about taking beautiful pictures. <b>(16) ______</b><br><br>I spend a lot of time researching animals that live in the oceans. Before even starting to plan a new article, I consider which ones are important or interesting for people to read about; for example, species that are becoming increasingly rare, or less well-known creatures. <b>(17) ______</b> Then I need to find out things like the best places to find that creature and the best time of year to go there.<br><br>Understanding animal behaviour is obviously important when it comes to underwater photography, so it's essential that I research that properly too. Apart from reading scientific journals, I speak to experts who spend their lives working with a particular species. <b>(18) ______</b> Occasionally, I've even included these experts in the final published article.<br><br>My favourite animals to photograph and write about are whales and sharks. On one trip, I was photographing a species of whale which had rarely seen humans underwater before. <b>(19) ______</b> But, to my surprise, I discovered that these whales were amazingly curious and trusting. Sharks are also wonderful to photograph – they're so powerful and move through the water so beautifully. <b>(20) ______</b><br><br>I think that's a shame, and as a journalist, I have the opportunity to show what they're really like; if people understood them better, I'm sure they'd respect them, and not be so afraid of them.",
+        options: [
+          { key: "A", text: "It was an unknown situation for me and I didn't know what to expect." },
+          { key: "B", text: "However, studying them certainly helped me take great photographs on the trip." },
+          { key: "C", text: "It can actually take me up to a year to make a decision." },
+          { key: "D", text: "It's useful to go to these places with other photographers." },
+          { key: "E", text: "I sometimes invite them to come on a photographic trip to see what I do." },
+          { key: "F", text: "Despite this, people often have a negative view of these animals." },
+          { key: "G", text: "It also involves studying a wide variety of creatures." },
+          { key: "H", text: "They wanted to find out more about me." }
+        ],
+        answers: { 16:"G", 17:"C", 18:"E", 19:"A", 20:"F" }
+      },
+      part5: {
+        passage: "The pink Amazon River dolphin<br><br>A special type of dolphin can be found in the waters of the Amazon River in Brazil. These dolphins are <b>(21) ......</b> from other species because they are pink. Scientists are not certain about the <b>(22) ......</b> for their skin colour, but some experts believe it could be a result of the red-coloured sand in the river. However, other scientists think that the dolphins <b>(23) ......</b> pinker as they become older.<br><br>Another special <b>(24) ......</b> about these dolphins is that they can <b>(25) ......</b> their heads from side to side, while most species of dolphin cannot. In addition, they have hairs on their noses that help them <b>(26) ......</b> for food at the bottom of the river. These animals are an amazing sight, and are popular with visitors and tourists travelling on the Amazon River by boat.",
+        questions: [
+          { opts: ["unusual","different","opposite","unknown"], correct: 1 },
+          { opts: ["aim","idea","answer","reason"], correct: 3 },
+          { opts: ["increase","develop","improve","grow"], correct: 3 },
+          { opts: ["fact","information","knowledge","reality"], correct: 0 },
+          { opts: ["switch","change","turn","fix"], correct: 2 },
+          { opts: ["catch","find","get","search"], correct: 3 }
+        ]
+      },
+      part6: {
+        passage: "We're a group of people aged 16–25 who meet every week for two hours of chat in Spanish. You don't have to be able to speak much Spanish: we welcome beginners, too. We talk about anything <b>(27) ......</b> may interest people, from food people enjoy <b>(28) ......</b> literature and politics.<br><br>We meet between 4.30 p.m. <b>(29) ......</b> 6.30 p.m. every Tuesday, in a large, comfortable room in the Central Library. The sessions are free, but we do ask people to pay £1 a session for coffee or juice. Staff from the School of Tourism at the University set <b>(30) ......</b> the group three years ago, but it's now organised <b>(31) ......</b> volunteers. The number of members <b>(32) ......</b> grown a lot during this time. As well as allowing people to practise their Spanish, the club brings people from different backgrounds together in order to enjoy each other's company.",
+        answers: ["which/that","to","and","up","by","has"]
+      }
+    },
+    2: {
+      part1: [
+        { q: "Rubbish notice:", opts: ["Remember to put out your rubbish before Monday evening.","Rubbish will be collected every Tuesday, starting next week.","There will be a rubbish collection every two weeks."], correct: 2 },
+        { q: "What is Nat's message about?", opts: ["Nat is explaining that his brother can give Tim a lift home after the match.","Nat is asking whether Tim's car will be fixed before the match.","Nat is reminding Tim that his brother is taking them to the match tomorrow."], correct: 0 },
+        { q: "What does the label say?", opts: ["You should stir the food for one minute as it's cooling.","You should leave the food for one minute after stirring it.","You should cook the food then eat it after four minutes."], correct: 1 },
+        { q: "What does Mrs Walker want students to do?", opts: ["give their opinions on her ideas for the fashion show","become more involved in organising the fashion show","produce more designs for the fashion show"], correct: 1 },
+        { q: "Note about Sandra:", opts: ["Sandra is going to phone and get tickets for a trip to the cinema.","Sandra is expecting both the play and the film to be very popular.","Tickets might become available for something the friends hoped to see."], correct: 2 }
+      ],
+      part2: {
+        people: [
+          { name: "6. Jane", desc: "is planning a very small party for her friends, and wants it to be in a historic place. She would like a photographer to be provided." },
+          { name: "7. Colin and Alison", desc: "want to hire a whole building just for themselves and their guests. They'd like the place to have a professional party organiser to help them plan everything, including an excellent meal." },
+          { name: "8. Alex and Diana", desc: "would like to arrive at their party by boat, and they want somewhere without bright lights. They're looking for a place which has had good reviews." },
+          { name: "9. Peter", desc: "needs a place where elderly guests can move around without difficulty, which also offers accommodation. He wants the choice of having the party either indoors or outdoors, depending on the weather on the day." },
+          { name: "10. Jenny and Robin", desc: "want a place where they can bring food themselves, and where children can run around and have fun. Some of their guests will need help with transport to the party." }
+        ],
+        options: [
+          { key: "A", text: "Hotel Homewood" }, { key: "B", text: "Murphy's" }, { key: "C", text: "Riverside Hall" },
+          { key: "D", text: "Waterford Hotel" }, { key: "E", text: "Kite Lodge" }, { key: "F", text: "Green Barn" },
+          { key: "G", text: "The Old Mill" }, { key: "H", text: "Savernake House" }
+        ],
+        answers: ["H","B","E","A","D"]
+      },
+      part3: [
+        { q: "To begin with, Ella wondered whether she and Josie would...", opts: ["get on well with the other volunteers.","be scared of the elephants.","argue with each other sometimes.","find two weeks looking after elephants too long."], correct: 0 },
+        { q: "What was Ella's favourite activity?", opts: ["cleaning the elephants","feeding the elephants","walking with the elephants","preparing food for the elephants"], correct: 3 },
+        { q: "Ella says she was happy that...", opts: ["the games they played were fun","the food they ate was vegetarian.","the weather was generally good.","the bedroom was big enough for them."], correct: 1 },
+        { q: "Ella thinks that Josie now...", opts: ["enjoys telling people about their trip.","realises that the trip was a great opportunity.","misses everyone she met in Thailand.","feels excited that she might go back to Thailand."], correct: 1 },
+        { q: "What would Ella write in a blog about her time in Thailand?", opts: ["We visited all the main tourist attractions and saw elephants and other wild animals in the beautiful forests.","We had a wonderful time - we relaxed, ate tasty meals and went for exciting elephant rides.","We visited a place where we could watch as elephants were fed. We were surprised how much food they needed.","We had a great time taking care of some elephants. It was fantastic to be so close to them in the water."], correct: 3 }
+      ],
+      part4: {
+        passage: "The clever design of supermarkets<br><br>Most people don't realise how cleverly designed many big supermarkets around the world are. This careful planning includes where each of the products is located, the lights, the music, everything!<br><br>The first thing people in many countries may notice as they walk into large supermarkets is that getting into the store is much easier than getting out. <b>(16) ______</b> This means that customers end up having to walk through half of the store to find a way out, seeing more things they want to buy on the way.<br><br>Once they're inside, the first products many shoppers often see are fruit and vegetables. <b>(17) ______</b> If that were the case, fruit and vegetables, many of which are easily damaged, could be put on top of the other shopping. But having them near the entrance can make customers feel that everything in the store is fresh and healthy, encouraging them to buy more.<br><br>What customers might also notice as they enter is the smell of freshly baked bread. This attracts many people towards the bakery to buy some. <b>(18) ______</b> Putting it in this location makes sure that shoppers walk past as many other products as possible to reach their delicious bread.<br><br>Research shows that if music is played in supermarkets, customers slow down and spend more time shopping. <b>(19) ______</b> And supermarkets know, of course, that this also means they'll buy more products.<br><br>In some countries, when customers finally arrive at the queue for the checkouts, they find themselves face-to-face with shelves full of small, inexpensive products like chocolate and sweets. <b>(20) ______</b> So they're often bought by tired parents to keep their bored sons or daughters entertained as they pack their shopping. Products placed next to checkouts sell up to eight times faster than in other parts of a store.",
+        options: [
+          { key: "A", text: "In one study, they actually stayed 34% longer than if there was none." },
+          { key: "B", text: "As a result, shoppers pass the cheaper products more quickly." },
+          { key: "C", text: "That's why expensive products are placed at the same height as people's eyes." },
+          { key: "D", text: "In fact, it would be more convenient for customers to reach this section later." },
+          { key: "E", text: "Many of these are designed to attract children." },
+          { key: "F", text: "That's because they often have entry doors that can't be used as exits." },
+          { key: "G", text: "This would encourage customers and their children to leave the store too quickly." },
+          { key: "H", text: "However, it's often right at the back of the store." }
+        ],
+        answers: { 16:"F", 17:"D", 18:"H", 19:"A", 20:"E" }
+      },
+      part5: {
+        passage: "Future foods<br><br>The world is always looking for new methods of food production. Scientists in Australia are now <b>(21) ......</b> in a project to grow food in a different way.<br><br>The scientists have produced plants that have grown not just faster, but also bigger. They <b>(22) ......</b> their techniques on methods that were previously tried in experiments to grow crops in space. Crops like peas were grown in special glass houses where temperatures were carefully controlled. Special lights were shone on the young plants for 22 hours a day. This had the <b>(23) ......</b> of increasing the speed at which the plants developed.<br><br>The scientists say that the results were even better than they had hoped. When they <b>(24) ......</b> the plants with ones grown in <b>(25) ......</b> conditions, they found that the new plants were also much healthier. Many people <b>(26) ......</b> that the technique will be used with a wide variety of plants in the future.",
+        questions: [
+          { opts: ["involved","concerned","decided","accepted"], correct: 0 },
+          { opts: ["found","agreed","set","based"], correct: 3 },
+          { opts: ["conclusion","solution","effect","product"], correct: 2 },
+          { opts: ["recognised","looked","considered","compared"], correct: 3 },
+          { opts: ["likely","special","normal","common"], correct: 2 },
+          { opts: ["predict","tell","follow","communicate"], correct: 0 }
+        ]
+      },
+      part6: {
+        passage: "A rainy day<br><br>One summer's day, my family decided to visit a waterfall in the countryside near our town. We had wanted to see it in the <b>(27) ......</b> for ages. We walked across the fields towards the waterfall, we <b>(28) ......</b> see it in the distance. It was quite <b>(29) ......</b> long way, but we got there after about an hour.<br><br>We sat down near the pool at the bottom of the waterfall to enjoy the picnic that we had taken with us. Then we noticed some black clouds in the sky, and some large drops <b>(30) ......</b> rain fell on us, so we quickly started to collect our things together. Carrying our bags, we ran as fast as we could, and when we reached the town, we went into the first café we saw. <b>(31) ......</b> spite of our wet clothes, we soon felt better after a delicious drink <b>(32) ......</b> hot chocolate!",
+        answers: ["could","a","had/'d","of","In","to"]
+      }
+    },
+    3: {
+      part1: [
+        { q: "Walking group notice:", opts: ["The walkers are planning to have their lunch in Mill Café next Tuesday.","If walkers want lunch from Mill Café, they must arrange this before Tuesday.","Walking group members can't park in Mill Café car park on Tuesday."], correct: 1 },
+        { q: "Washing instructions:", opts: ["Cotton clothes must be washed at 30°C.","Wash different colours at different temperatures.","Wash at this temperature to help the environment."], correct: 2 },
+        { q: "What does the email say?", opts: ["Ana will miss the start of the film due to heavy traffic.","Ana should try to buy the cinema tickets before Domenico arrives.","Domenico and Ana can meet in the queue at the cinema."], correct: 1 },
+        { q: "What does the notice say?", opts: ["Students will have to pay if they don't bring books back on time.","Students can pay a small charge to borrow books for longer than 30 days.","Students must not take out more books until they pay what they owe."], correct: 0 },
+        { q: "What is Joanna telling Peter?", opts: ["His college lecture is cancelled.","She is able to offer him a lift to their college.","He needs to find a different way to go to college."], correct: 2 }
+      ],
+      part2: {
+        people: [
+          { name: "6. Asma", desc: "loves cycling, but she also wants to be able to relax after a busy day. She'd like to try the local food while she's on holiday." },
+          { name: "7. Dan", desc: "is a biology student and has an interest in sea life. He wants to try doing a few water sports. He'd like to sleep in a tent among trees." },
+          { name: "8. Tilda", desc: "enjoys meeting new people, and likes hiking in the countryside. She wants to sleep somewhere comfortable, and doesn't like camping." },
+          { name: "9. Archie", desc: "is looking for an activity-filled holiday where he can dive and swim. He's happy to stay in basic accommodation and cook his own meals. He's keen to try a fun or unusual local activity." },
+          { name: "10. Mia", desc: "is very interested in nature, and would like to visit a place with wildlife that most people have never seen. She likes taking photos, and wants something sociable to do in the evenings." }
+        ],
+        options: [
+          { key: "A", text: "Coral Bay Camp" }, { key: "B", text: "Adventure Trips" }, { key: "C", text: "Mari Resort" },
+          { key: "D", text: "Highland Lodge" }, { key: "E", text: "Sunshine Holidays" }, { key: "F", text: "Riverside Escape" },
+          { key: "G", text: "Terra Holidays" }, { key: "H", text: "Jungle Camp" }
+        ],
+        answers: ["G","C","B","E","H"]
+      },
+      part3: [
+        { q: "In the first paragraph, what does Gina say about her work?", opts: ["She was especially pleased with one project she was involved in.","She finds visiting other businesses very interesting.","She has learnt how to take good photographs of her flowers.","She prefers some types of customers to others."], correct: 0 },
+        { q: "What does Gina say about getting up so early?", opts: ["She admits she needs more sleep.","She doesn't notice what the weather's like.","Her friends don't realise how hard it is for her.","It's worth doing because she loves her job."], correct: 3 },
+        { q: "What does Gina find difficult when she is at the flower market?", opts: ["asking to pay less for flowers","finding flowers in a variety of colours","remembering what customers have asked for","having such a limited range of flowers to choose from"], correct: 0 },
+        { q: "When working in her shop, Gina feels...", opts: ["guilty about the high prices she has to charge.","upset when people change their mind.","pleased she is able to sell so many flowers.","positive about the challenges she has to deal with."], correct: 3 },
+        { q: "Which would be a good notice for the window of Gina's flower shop?", opts: ["All our flowers are locally grown!","We can provide flowers for any occasion — large or small!","Design your own flower display here!","We can find any kind of flower that you'd like!"], correct: 1 }
+      ],
+      part4: {
+        passage: "A very original artist<br><br>Jenny Blatchford, the talented young sculptor, was born in the south-west of England in 1989. She is the daughter of a doctor, and the family lived in a number of different towns when Jenny was a child. <b>(16) ______</b> However, there were some advantages; she says it gave her the ability to become used to new environments very quickly.<br><br>Her earliest memories are of playing with her primary school friends on the outskirts of a city where workers were building lots of new apartment blocks. <b>(17) ______</b> The amount of skill involved impressed her greatly, and Jenny says that this early experience led her to become interested in sculpture.<br><br>She was a clever student and went to a very good school. It was a wonderful place to study science and languages, but not art. <b>(18) ______</b> In fact, most of the staff thought it was something pupils were either good or bad at, and didn't need special instruction. Luckily one of her teachers recognised Jenny's talent and gave her art lessons in the evenings after school.<br><br>No-one was surprised when Jenny chose to apply to study art at college. She had the opportunity to develop her skills in sculpture, creating huge statues of animals, mainly out of materials such as wood, stone and metal. <b>(19) ______</b> Recently she has even started to make them out of paper. Some of her sculptures are extremely realistic, but others are unusually shaped. Art experts love her originality and she has won many awards and prizes.<br><br>Jenny gets her ideas for her sculptures in a number of different ways. <b>(20) ______</b> She also likes to look at other people's art. She says the most important thing is that she is excited by each new project.",
+        options: [
+          { key: "A", text: "Sometimes they come from spending time outdoors." },
+          { key: "B", text: "This meant that she didn't have the chance to get to know anywhere very well." },
+          { key: "C", text: "In spite of this, she is influencing a lot of young artists." },
+          { key: "D", text: "Unfortunately, little time was spent there on teaching it." },
+          { key: "E", text: "She loved moving around, and made many new friends." },
+          { key: "F", text: "However, she also enjoyed trying to use other things, like glass." },
+          { key: "G", text: "All subjects were taught very well, and Jenny learned quickly." },
+          { key: "H", text: "She loved watching as each new floor was added." }
+        ],
+        answers: { 16:"B", 17:"H", 18:"D", 19:"F", 20:"A" }
+      },
+      part5: {
+        passage: "Plastic in the oceans<br><br>These days, plastic waste in the world's oceans has become a serious issue. Scientists want people to know about the problems that are created by the plastic that gets into the oceans, often after people have used it and <b>(21) ......</b> it away. Many of these bits of plastic are extremely small; some are just the <b>(22) ......</b> of a tiny piece of salt.<br><br>These little pieces of plastic often <b>(23) ......</b> up in the sea. There, perhaps because they look very similar to fish eggs, they are often eaten by other animals. They are also sometimes <b>(24) ......</b> by sea creatures who are trying to feed their own young. Scientists say that this is very bad for many different <b>(25) ......</b> of animal; cod, penguins and dolphins have all been <b>(26) ......</b> by the problem.",
+        questions: [
+          { opts: ["taken","given","thrown","put"], correct: 2 },
+          { opts: ["amount","size","total","quantity"], correct: 1 },
+          { opts: ["keep","grow","end","catch"], correct: 2 },
+          { opts: ["looked","hunted","searched","collected"], correct: 3 },
+          { opts: ["members","ranges","species","names"], correct: 2 },
+          { opts: ["approached","affected","arranged","attended"], correct: 1 }
+        ]
+      },
+      part6: {
+        passage: "The Westway Cinema<br><br>The new Westway Cinema is finally open! I went last night with my brother, and we both agreed it's much better than the old one <b>(27) ......</b> to be. Although the ticket prices are higher, the extra cost is worth paying.<br><br>The new owners <b>(28) ......</b> now taken out all the old seats and put in brand new ones that are really comfortable. There's also new air conditioning. This is fantastic because in the past it was sometimes <b>(29) ......</b> hot that it was difficult to concentrate on the film!<br><br>There are also special offers available. For example, <b>(30) ......</b> you buy two tickets, you can choose something for free – either a snack or a drink. I'm sure this <b>(31) ......</b> be popular, as you can't bring <b>(32) ......</b> own food into the cinema.<br><br>I'd really recommend going to the Westway Cinema - it's a great night out.",
+        answers: ["used","have","so","if/when/whenever/provided","will","your"]
+      }
+    },
+    4: {
+      part1: [
+        { q: "Why did Joanne write this email?", opts: ["to pass on an invitation","to make a suggestion","to change an arrangement"], correct: 1 },
+        { q: "What does the notice say?", opts: ["Staff cannot enter unless they have a card.","Staff requiring a card can apply at Reception.","Staff with a card may still be refused entry."], correct: 0 },
+        { q: "What is Pete doing?", opts: ["informing Andy that there's a walk tomorrow","warning Andy not to be late for the walk","enquiring whether Andy can come on the walk"], correct: 1 },
+        { q: "Tour notice:", opts: ["The Central Gallery offers tours at a good price to all visitors.","Two people can go on a city tour for the price of one.","People on the tour can buy cheaper tickets for various places in the city."], correct: 2 },
+        { q: "Ben is...", opts: ["grateful for Margot's suggestion.","excited about trying a new activity.","looking forward to seeing Margot."], correct: 0 }
+      ],
+      part2: {
+        people: [
+          { name: "6. Rashid", desc: "would like to cook healthy meals for his children, and is looking for a course which teaches basic skills. He and his children enjoy eating dishes from around the world." },
+          { name: "7. Angela's", desc: "a good cook, and wants to make a special dinner for 20 guests at her husband's birthday party. She'd like to make more advanced dishes, and her husband particularly likes traditional food." },
+          { name: "8. Marcus", desc: "would like some ideas for meals for one person, without having to buy fresh ingredients every day. He wants quick and easy dishes he can cook when he gets home from work feeling hungry." },
+          { name: "9. Francesca", desc: "is an experienced cook who wants to get new ideas for meals for her family. She'd like to increase her range of skills in the kitchen and learn how to make tasty desserts." },
+          { name: "10. Aston", desc: "wants to spend time trying complicated recipes at the weekend because he finds it relaxing. He wants to make food in large amounts, so he can take a proper meal to work for lunch every day." }
+        ],
+        options: [
+          { key: "A", text: "Family flavours" }, { key: "B", text: "Tasty treats" }, { key: "C", text: "Come and cook!" },
+          { key: "D", text: "Quick bites" }, { key: "E", text: "Delicious dishes" }, { key: "F", text: "Eat well" },
+          { key: "G", text: "World kitchen" }, { key: "H", text: "Hot stuff" }
+        ],
+        answers: ["B","E","C","H","F"]
+      },
+      part3: [
+        { q: "Why did Sebastian decide to start a film club?", opts: ["He didn't like the films at his local cinema.","He wanted the opportunity to share opinions about films.","The nearest cinema was too far from his house.","His friends suggested the idea to him."], correct: 1 },
+        { q: "Why does Sebastian show films in many different places?", opts: ["He wants to make as much money as possible.","He can offer a wider variety of food to audiences.","He wants more people to be able to watch the films.","He can choose somewhere suitable for each film."], correct: 3 },
+        { q: "How does Sebastian feel at each film club session now?", opts: ["anxious about how many people will come","worried about some of the equipment not working properly","pleased when he hears that the audience have enjoyed themselves","happy to be able to relax completely"], correct: 2 },
+        { q: "How do most people find out about the film club?", opts: ["They are told about it by someone they know.","They notice posters in the local area.","They see its social media page.","They read about it in the local newspaper."], correct: 0 },
+        { q: "What would Sebastian write on the film club blog?", opts: ["You'll never guess what we're planning to do before the next film – it'll be something to get everyone talking for sure! Details to follow.","We're planning to set up clubs all over the country because we've been so successful - watch this space!","Our aim's to encourage a wider range of viewers. We get lots of children, but it's so important to include all ages.","We've put up our ticket prices, but food and drinks are included in the price, so we think it's good value."], correct: 0 }
+      ],
+      part4: {
+        passage: "How the world's oldest message in a bottle found its way home<br><br>Staff at the Marine Biological Association (MBA) in England were surprised when an envelope arrived at their offices addressed to 'George Parker Bidder'. They couldn't understand why someone was writing to the Association's former president, who had been dead for more than 60 years. It became clearer when the envelope was opened and its contents examined. Inside, there was an old postcard. Written on one side was a series of questions about how the postcard had been discovered. <b>(16) ______</b><br><br>It turned out that the postcard had come from a bottle dropped into the North Sea more than a century earlier. It was one of just over 1,000 bottles that Bidder had thrown into the water as part of a study into ocean currents and the movement of fish. <b>(17) ______</b> They were generally picked up by fishermen or by people walking along the beach, who then sent the postcards inside them back to Bidder.<br><br>The MBA still has some of the postcards. The 400 or so that weren't returned had probably got lost. <b>(18) ______</b> But somehow, the one carrying the recently returned postcard had remained in the sea for over a hundred years. It appears it finally found its way to a sandy beach on Amrum Island, just off the coast near the German-Danish border. <b>(19) ______</b> After breaking the bottle open, she filled out the postcard and sent it off to the MBA, not realising she was posting a message from the distant past.<br><br>Unfortunately, the delayed arrival of Bidder's old postcard at the MBA offices hasn't added to what staff there already know about the North Sea currents. <b>(20) ______</b> What happened in between remains a mystery!",
+        options: [
+          { key: "A", text: "It's also possible that the bottles containing them had broken." },
+          { key: "B", text: "However, they were never found." },
+          { key: "C", text: "They believe it shows how much marine science has changed." },
+          { key: "D", text: "Most of them were discovered within four years of this experiment." },
+          { key: "E", text: "On the other, were directions on how to mail it back." },
+          { key: "F", text: "All it tells them is where it was dropped and where it was found." },
+          { key: "G", text: "She worked with Bidder to understand how fish move through the oceans." },
+          { key: "H", text: "It was then picked up by a woman on holiday there." }
+        ],
+        answers: { 16:"E", 17:"D", 18:"A", 19:"H", 20:"F" }
+      },
+      part5: {
+        passage: "Swordfish<br><br>Swordfish are a species of large fish. They live in the Indian, Atlantic and Pacific Oceans, and they are easy to recognise because of the <b>(21) ......</b> long, sharp point that grows out from the front of their heads.<br><br>Although they <b>(22) ......</b> to prefer warmer waters, they can live in quite a <b>(23) ......</b> range of temperatures. They travel to warmer waters in the winter and cooler ones in the summer.<br><br>Female swordfish are generally larger than the males of the species. The largest swordfish ever caught weighed 536 kilogrammes, and it is <b>(24) ......</b> that they can grow to be over 4 metres in length. They live for around 8 years.<br><br>Swordfish hunt other ocean fish. They are able to swim at <b>(25) ......</b> speed – up to an amazing 80 kilometres per hour. This gives them an important <b>(26) ......</b> over other sea creatures when they are searching for food.",
+        questions: [
+          { opts: ["definitely","extremely","totally","completely"], correct: 3 },
+          { opts: ["look","think","choose","seem"], correct: 3 },
+          { opts: ["wide","steep","high","deep"], correct: 0 },
+          { opts: ["believed","appeared","decided","admitted"], correct: 0 },
+          { opts: ["hard","large","great","strong"], correct: 2 },
+          { opts: ["achievement","development","advantage","condition"], correct: 2 }
+        ]
+      },
+      part6: {
+        passage: "How to hold a fun party<br><br>Are you thinking about holding a party? Then you need to make sure it's lots of fun! Invite plenty <b>(27) ......</b> people and include a few surprises. For example, if you're serving food, try ordering ten pizzas <b>(28) ......</b> are the same flavour but come from different restaurants in your area. Then have a 'taste test' and vote on <b>(29) ......</b> best one. Or how <b>(30) ......</b> playing games? You could have a video games tournament and offer prizes for the winners. You could also have a singing competition and ask each guest to sing a song.<br><br>If your party includes a meal around a table, for each new course, ask your guests to sit next to someone different, in <b>(31) ......</b> to talk to as many different people as possible. Finally, play fun music: your guests might even get up and <b>(32) ......</b> dance!",
+        answers: ["of","that/which","the","about","order","as"]
+      }
+    }
+  },
+  listening: {
+    1: {
+      part1: [
+        { q: "What has the woman left behind?", opts: ["Her passport","Her phone","Her guidebook"], correct: 2 },
+        { q: "Which T-shirt does the boy want?", opts: ["Striped T-shirt with stars on the bottom","Striped T-shirt with stars on the top and circles on the bottom","T-shirt with circles on the top and stars on the bottom"], correct: 1 },
+        { q: "How did the woman book tickets for the show?", opts: ["In person at the theatre","By phone","Online"], correct: 1 },
+        { q: "Why is the train to Histon delayed?", opts: ["Heavy rain","Strong winds","Snow"], correct: 1 },
+        { q: "Where are the tourists most likely to see a tiger?", opts: ["At a water hole","In open spaces","In the forest"], correct: 1 },
+        { q: "Which film will they go and see?", opts: ["A detective film","A science-fiction film","A 19th-century drama"], correct: 0 },
+        { q: "How did the man travel to work?", opts: ["By bicycle","By bus","On foot"], correct: 2 }
+      ],
+      part2: [
+        { q: "You will hear a husband and wife talking about keeping fit and healthy. What do they both agree to change?", opts: ["their sleep routines","their eating habits","their exercise programmes"], correct: 1 },
+        { q: "You will hear two friends talking about the woman's work. How does the woman feel?", opts: ["She's pleased to have a new boss.","She's excited about some recent changes.","She's more positive than she was before."], correct: 2 },
+        { q: "You will hear a man telling a friend about his holiday. How did the man feel when he visited some ancient ruins?", opts: ["surprised not to be able to climb them","disappointed by their location","impressed by their size"], correct: 2 },
+        { q: "You will hear two friends talking about doing a foreign language course. What do they agree about?", opts: ["which level of course to take","where to take the course","how long the course should be"], correct: 0 },
+        { q: "You will hear two people talking about a music festival they're organising. They're both worried about...", opts: ["how good the music will be.","how many people will attend.","how suitable the weather will be."], correct: 1 },
+        { q: "You will hear two friends discussing an article about air pollution. The woman is...", opts: ["surprised by some new information.","annoyed by the writer's attitude.","confused by all the details."], correct: 0 }
+      ],
+      part3: {
+        intro: "You will hear a woman talking to some cyclists about a group bike ride.",
+        items: [
+          { q: "The group bike ride will be on (14) ...... next week.", ans: "Sunday" },
+          { q: "The length of the bike ride will be (15) ......", ans: "21km / kilometre(s) / kilometer(s)" },
+          { q: "The bike ride will begin from (16) ...... Bridge.", ans: "Skerten" },
+          { q: "The cyclists will stop beside the (17) ...... to rest and eat something.", ans: "castle" },
+          { q: "Riders can buy (18) ...... at a shop during the ride.", ans: "(a/some) cake(s)" },
+          { q: "The cyclists must wear (19) ......", ans: "(some) gloves" }
+        ]
+      },
+      part4: {
+        intro: "You will hear an interview with a wildlife photographer called James Thomson who has won a photography competition.",
+        items: [
+          { q: "What made James become interested in photography?", opts: ["receiving a camera as a gift","seeing his mother taking photographs","attending a photography exhibition"], correct: 0 },
+          { q: "What does James say about the park where he took his prize-winning photo?", opts: ["He had taken photos in it before.","Someone he knew recommended it to him.","It's always been well known for its natural beauty."], correct: 0 },
+          { q: "After winning the competition, James felt...", opts: ["keen to tell his parents about his achievement.","pleased to meet a famous photographer.","surprised because he hadn't won in previous competitions."], correct: 1 },
+          { q: "In James' opinion, what is most important for a good photograph?", opts: ["It needs plenty of planning.","It must be beautiful to look at.","It teaches people something new."], correct: 2 },
+          { q: "James thinks that photography is a good hobby because...", opts: ["it involves travelling to interesting places.","it can become a successful career.","it's a great social activity."], correct: 2 },
+          { q: "What advice does James have for other photographers?", opts: ["Spend a lot of time taking pictures.","Do a course to get the right skills.","Get the best equipment possible."], correct: 0 }
+        ]
+      }
+    },
+    2: {
+      part1: [
+        { q: "What does the man decide to buy?", opts: ["A belt","A tie","A hat"], correct: 1 },
+        { q: "What kind of job has the woman applied for?", opts: ["A job at a library","A job at a museum","A job at a computer company"], correct: 1 },
+        { q: "How will the man travel to work today?", opts: ["By taxi","By train","By car"], correct: 1 },
+        { q: "Where does the man think he lost his wallet?", opts: ["At the grocery store","At the bookstore","In the elevator"], correct: 1 },
+        { q: "What will the man make for dinner tonight?", opts: ["A pizza","A steak","A salad"], correct: 1 },
+        { q: "Who was the woman's favourite character in the film?", opts: ["A female police detective with long dark curly hair","A female police detective with curly hair and a male colleague with short dark hair and glasses","A female police detective with straight hair"], correct: 1 },
+        { q: "What does the girl want her father to deliver?", opts: ["Her keys","Her glasses","Her notes"], correct: 0 }
+      ],
+      part2: [
+        { q: "You will hear two friends talking about some work the man has to do. The woman tells the man not to worry about...", opts: ["how quickly he does the work.","the order in which he does the work.","having to ask for support from others."], correct: 1 },
+        { q: "You will hear two students talking about a history website. They agree that...", opts: ["it looks good.","it's easy to use.","it's useful for studying."], correct: 2 },
+        { q: "You will hear two friends talking about the woman's holiday. How did she feel about it?", opts: ["satisfied with the food that she tried","impressed with the hotel she stayed in","pleased with the prices she paid for things"], correct: 2 },
+        { q: "You will hear two friends talking about a shopping centre. They agree that it needs to have...", opts: ["extra space for parking.","more places to eat.","a wider range of shops."], correct: 1 },
+        { q: "You will hear two friends talking about playing golf. What does the woman say about it?", opts: ["She hopes she'll be able to play it more often.","She thinks the rules are too complicated.","She believes she has a talent for it."], correct: 2 },
+        { q: "You will hear two friends talking about a novel. What does the man say about it?", opts: ["The characters aren't very interesting.","The chapters are too long.","The story isn't very realistic."], correct: 0 }
+      ],
+      part3: {
+        intro: "You will hear some information about a one-day drumming class.",
+        items: [
+          { q: "Students will need to have a lot of (14) ...... for the class.", ans: "energy" },
+          { q: "Students will start the class by seeing a (15) ...... before listening to a talk.", ans: "(short) performance" },
+          { q: "In the morning, students will learn to (16) ...... correctly.", ans: "stand" },
+          { q: "The afternoon session will focus on what are known as (17) ......", ans: "stick skills" },
+          { q: "Drumming improves people's (18) ...... and fitness.", ans: "mood" },
+          { q: "The instructor's email address is (19) ......", ans: "paxmen" }
+        ]
+      },
+      part4: {
+        intro: "You will hear an interview with a young woman called Lara, who has her own baking business.",
+        items: [
+          { q: "Why did Lara decide to open her baking business?", opts: ["Her parents encouraged her to do it.","Her teacher thought she'd be successful.","Her school friends bought cakes from her."], correct: 0 },
+          { q: "What challenge did Lara have to deal with when she started her business?", opts: ["managing her time","dealing with complaints","finding the right recipes"], correct: 2 },
+          { q: "Lara says that baking bread is...", opts: ["more popular than making cakes.","more difficult than making cakes.","more fun than making cakes."], correct: 1 },
+          { q: "What does Lara feel that she needs to do to improve her business?", opts: ["spend more money on advertising","sell more traditional products","develop more confidence in herself"], correct: 2 },
+          { q: "What does Lara intend to do in the future?", opts: ["have her own café","teach young people","write a book"], correct: 1 },
+          { q: "Lara advises people who want to start a baking business to...", opts: ["learn from famous bakers.","get a qualification before they start.","be realistic about what they can achieve."], correct: 2 }
+        ]
+      }
+    },
+    3: {
+      part1: [
+        { q: "What did the man do yesterday?", opts: ["He returned a jacket to a shop.","He went to the bank.","He bought a novel."], correct: 2 },
+        { q: "How did the woman travel back from her holiday?", opts: ["By bus","By plane","By train"], correct: 1 },
+        { q: "Which hat did the fashion model wear in the photos?", opts: ["A sun hat","A baseball cap","A woolly hat"], correct: 2 },
+        { q: "Where did the man leave his driving licence?", opts: ["At the hotel","At the airport","At the reception"], correct: 0 },
+        { q: "Where are they going walking?", opts: ["Along the beach","Up the cliff path","Through the forest"], correct: 1 },
+        { q: "What will the woman do to her friend's car?", opts: ["Put air in a tyre","Clean it","Fill it with petrol"], correct: 0 },
+        { q: "What did the woman eat at the restaurant?", opts: ["Fish","Roast chicken","Omelette with salad"], correct: 1 }
+      ],
+      part2: [
+        { q: "You will hear two friends talking about the woman's dress. Why is the woman returning the dress to the shop?", opts: ["It's the wrong colour.","It's damaged.","It doesn't fit."], correct: 0 },
+        { q: "You will hear two friends talking about a new sports centre. They agree that it needs to have...", opts: ["more staff available.","better equipment.","bigger changing rooms."], correct: 0 },
+        { q: "You will hear a woman talking to a receptionist in a hotel. Why has the woman gone to the hotel?", opts: ["to book a room","to meet someone","to make a complaint"], correct: 1 },
+        { q: "You will hear a man telling a friend about his holiday in the mountains. What did he enjoy most about it?", opts: ["having skiing lessons","seeing the countryside","spending time with friends"], correct: 1 },
+        { q: "You will hear two friends talking about playing the guitar. What's the man going to do?", opts: ["practise playing with other people","start playing a different instrument","try to play every day"], correct: 0 },
+        { q: "You will hear two friends talking about a film they've just seen. What does the man say about the film?", opts: ["It wasn't very funny.","It won an important prize.","It was easy to predict the ending."], correct: 2 }
+      ],
+      part3: {
+        intro: "You will hear an announcement about a song writing competition.",
+        items: [
+          { q: "Songs in this year's competition must be about the (14) ......", ans: "moon" },
+          { q: "Songs must be no longer than (15) ......", ans: "210 seconds/secs" },
+          { q: "The judge this year is a famous (16) ......", ans: "poet" },
+          { q: "The prize for the winner is a trip to a (17) ......", ans: "(music) studio" },
+          { q: "The closing date for entries is (18) ......", ans: "13(th) October / Oct" },
+          { q: "The email address to send songs to is (19) ...... @songwriters.net", ans: "delhar" }
+        ]
+      },
+      part4: {
+        intro: "You will hear an interview with a professional explorer called Alexis Bartoli, who travels to places that few other people visit.",
+        items: [
+          { q: "Alexis decided to become an explorer after...", opts: ["reading a book.","listening to a talk.","seeing a TV programme."], correct: 1 },
+          { q: "Alexis felt anxious before his first expedition because...", opts: ["he didn't know what to expect.","he knew it would be quite dangerous.","he'd never been very far away from home."], correct: 0 },
+          { q: "Why did Alexis start making films on his expeditions?", opts: ["to make money for future trips","to provide scientists with information","to learn a new skill"], correct: 1 },
+          { q: "Alexis says his favourite part of any expedition is...", opts: ["discovering new landscapes.","experiencing different climates.","meeting new people."], correct: 2 },
+          { q: "Alexis's latest expedition involved...", opts: ["walking across a desert.","sailing across an ocean.","spending time in a rainforest."], correct: 1 },
+          { q: "What does Alexis say he wants to do in the future?", opts: ["try a different profession","explore his home country","return to places he's visited before"], correct: 1 }
+        ]
+      }
+    },
+    4: {
+      part1: [
+        { q: "What has the man lost?", opts: ["His gloves","His glasses","His headphones"], correct: 1 },
+        { q: "What is the woman going to do tomorrow?", opts: ["Drive to the coast","Go to the beach","Have a meal at her cousin's house"], correct: 1 },
+        { q: "Which items cost less than usual at the moment?", opts: ["Phones","Sports equipment","Coats and handbags"], correct: 1 },
+        { q: "Which place will the people visit first on the tour?", opts: ["A café by the river","A castle","A museum"], correct: 1 },
+        { q: "Which tickets did the man buy?", opts: ["€20 tickets","€30 tickets","€50 tickets"], correct: 1 },
+        { q: "What does the man want to buy?", opts: ["An electric guitar","Drums","A piano"], correct: 1 },
+        { q: "Which type of exercise does the doctor recommend?", opts: ["Lifting weights","Running","Swimming"], correct: 2 }
+      ],
+      part2: [
+        { q: "You will hear two friends talking about a hotel. They agree that...", opts: ["the staff are very friendly.","the rooms have good views.","the food there is excellent."], correct: 0 },
+        { q: "You will hear two friends talking about an art exhibition. Why was the woman disappointed with it?", opts: ["There weren't many paintings.","It was very expensive.","The gallery was too dark."], correct: 2 },
+        { q: "You will hear two friends talking about a book they've read. They both think it would be better if it had...", opts: ["a more original ending.","more interesting characters.","more action in the story."], correct: 2 },
+        { q: "You will hear a woman telling a friend about a visit to the hairdresser's. What does she say about it?", opts: ["The haircut wasn't good value.","The place wasn't very tidy.","The hairdresser wasn't very friendly."], correct: 0 },
+        { q: "You will hear a woman telling a friend about her singing class. What is she surprised about?", opts: ["the size of the group","how confident she feels about singing","the attention she gets from the teacher"], correct: 1 },
+        { q: "You will hear two friends talking about a new sports centre. What do they agree would improve it?", opts: ["reducing the entry price","offering classes at different times","changing the temperature in the pool"], correct: 2 }
+      ],
+      part3: {
+        intro: "You will hear a guide giving information to people who are going to watch a car race involving old cars.",
+        items: [
+          { q: "Before the race: see the cars, next to the (14) ......", ans: "lake" },
+          { q: "Before the race: enter a competition to win a (15) ......", ans: "holiday" },
+          { q: "Before the race: buy (16) ...... at a lower price than usual at the café.", ans: "burgers / a burger" },
+          { q: "The race starts at (17) ......", ans: "2.30 / two thirty / half past two" },
+          { q: "After the race: use the (18) ...... exit to get to the station.", ans: "north" },
+          { q: "After the race: upload your photos to (19) ...... www.", ans: "cheppsat / Cheppsat" }
+        ]
+      },
+      part4: {
+        intro: "You will hear an interview with a young writer called Jenny Taylor, who has just had her first novel published.",
+        items: [
+          { q: "What does Jenny say about school?", opts: ["She read a lot of poems there.","She was proud of what she wrote there.","She admired someone there."], correct: 2 },
+          { q: "How did Jenny get the idea for her first novel?", opts: ["talking to friends and family","watching strangers","looking on the internet"], correct: 1 },
+          { q: "What's Jenny's novel about?", opts: ["a famous historical event","a long journey","a family's problems"], correct: 2 },
+          { q: "How does Jenny feel about her novel?", opts: ["satisfied that it has a good story","pleased that people are buying it","surprised that it was published"], correct: 0 },
+          { q: "What does Jenny say about her writing routine?", opts: ["She does her best writing in the morning.","She wears pyjamas when she writes.","She likes to write a similar amount every day."], correct: 1 },
+          { q: "What does Jenny usually read for pleasure?", opts: ["funny stories","exciting stories","true stories"], correct: 0 }
+        ]
+      }
+    }
+  }
+};
+
+</script>
+<script>
+let currentSkill = 'reading';
+let currentTest = 1;
+let currentMode = 'practice';
+let isAnswerRevealed = false;
+let timerInterval = null;
+
+const container = document.getElementById('quiz-container');
+const testGroup = document.getElementById('test-group');
+
+function buildTestTabs() {
+  testGroup.innerHTML = '';
+  for (let t = 1; t <= 4; t++) {
+    const btn = document.createElement('button');
+    btn.className = 'tab-btn' + (t === currentTest ? ' active' : '');
+    btn.textContent = 'Test ' + t;
+    btn.onclick = () => setTest(t);
+    testGroup.appendChild(btn);
+  }
+}
+
+function setSkill(skill) {
+  currentSkill = skill;
+  document.getElementById('btn-reading').classList.toggle('active', skill === 'reading');
+  document.getElementById('btn-listening').classList.toggle('active', skill === 'listening');
+  render();
+}
+
+function setTest(t) {
+  currentTest = t;
+  buildTestTabs();
+  render();
+}
+
+function setMode(mode) {
+  currentMode = mode;
+  document.getElementById('btn-practice').classList.toggle('active', mode === 'practice');
+  document.getElementById('btn-test').classList.toggle('active', mode === 'test');
+  render();
+}
+
+function escapeHtml(s) {
+  return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+function renderMCQ(qid, qText, opts, correctIdx) {
+  let html = `<div class="q-card" id="card-${qid}"><div class="q-text">${qText}</div>`;
+  const letters = ['A','B','C','D'];
+  opts.forEach((opt, idx) => {
+    if (currentMode === 'practice') {
+      html += `<div class="opt" data-correct-idx="${idx === correctIdx ? '1':'0'}" onclick="checkAns(this,${idx},${correctIdx},'${qid}')">
+                 <span class="letter">${letters[idx]}</span><span>${escapeHtml(opt)}</span>
+               </div>`;
+    } else {
+      html += `<label class="opt" onclick="selectRadio(this)">
+                 <input type="radio" name="${qid}" value="${idx}" style="display:none">
+                 <span class="letter">${letters[idx]}</span><span>${escapeHtml(opt)}</span>
+               </label>`;
+    }
+  });
+  html += `</div>`;
+  return html;
+}
+
+function selectRadio(label) {
+  const input = label.querySelector('input');
+  input.checked = true;
+  const siblings = label.parentElement.querySelectorAll('.opt');
+  siblings.forEach(s => s.style.borderColor = 'var(--border)');
+  label.style.borderColor = 'var(--primary)';
+}
+
+function checkAns(el, idx, correctIdx, qid) {
+  if (el.classList.contains('disabled')) return;
+  const card = document.getElementById(`card-${qid}`);
+  const opts = card.querySelectorAll('.opt');
+  opts.forEach(o => o.classList.add('disabled'));
+  if (idx === correctIdx) {
+    el.classList.add('correct-mark');
+  } else {
+    el.classList.add('wrong-mark');
+    opts[correctIdx].classList.add('correct-mark');
+  }
+}
+
+function renderGapFill(qid, qNum, opts, correctIdx) {
+  return renderMCQ(qid, `Câu ${qNum}.`, opts, correctIdx);
+}
+
+function renderTextAnswer(qid, qText, answer) {
+  let html = `<div class="q-card" id="card-${qid}"><div class="q-text">${qText}</div>`;
+  if (currentMode === 'practice') {
+    html += `<button class="btn-mini" onclick="toggleTextAns('ans-${qid}')">Xem đáp án</button>
+             <div id="ans-${qid}" class="ans-box ans-reveal">Đáp án: ${escapeHtml(answer)}</div>`;
+  } else {
+    html += `<input type="text" class="text-input" data-qid="${qid}" placeholder="Nhập câu trả lời...">
+             <div class="ans-box" id="ans-${qid}"></div>`;
+  }
+  html += `</div>`;
+  return html;
+}
+
+function toggleTextAns(id) {
+  document.getElementById(id).classList.toggle('show');
+}
+
+function renderMatching(part, prefix) {
+  let html = '<div class="match-options-box"><b>Các lựa chọn:</b><br>';
+  part.options.forEach(o => {
+    html += `<div class="opt-line"><b>${o.key}.</b> ${escapeHtml(o.text)}</div>`;
+  });
+  html += '</div>';
+
+  part.people.forEach((person, i) => {
+    const qid = `${prefix}-m${i}`;
+    const correctKey = part.answers[i];
+    let optionsHTML = '<option value="">-- Chọn đáp án --</option>';
+    part.options.forEach(o => {
+      optionsHTML += `<option value="${o.key}">${o.key} - ${escapeHtml(o.text)}</option>`;
+    });
+    html += `<div class="q-card" id="card-${qid}">
+               <div class="q-text"><span class="q-num">${escapeHtml(person.name)}</span> ${escapeHtml(person.desc)}</div>`;
+    if (currentMode === 'practice') {
+      html += `<select class="dropdown-ans" data-correct="${correctKey}" onchange="checkDropdown(this)">${optionsHTML}</select>
+               <div class="ans-box ans-reveal" id="ans-${qid}">Đáp án đúng: ${correctKey} - ${escapeHtml(part.options.find(o=>o.key===correctKey).text)}</div>`;
+    } else {
+      html += `<select class="dropdown-ans" data-qid="${qid}" data-correct="${correctKey}">${optionsHTML}</select>
+               <div class="ans-box" id="ans-${qid}"></div>`;
+    }
+    html += `</div>`;
+  });
+  return html;
+}
+
+function checkDropdown(sel) {
+  const correct = sel.getAttribute('data-correct');
+  const val = sel.value;
+  if (!val) { sel.style.borderColor = 'var(--border)'; sel.style.background = '#fff'; sel.style.color = 'var(--text)'; return; }
+  if (val === correct) {
+    sel.style.borderColor = 'var(--ok-border)'; sel.style.background = 'var(--ok-bg)'; sel.style.color = 'var(--ok-text)';
+  } else {
+    sel.style.borderColor = 'var(--bad-border)'; sel.style.background = 'var(--bad-bg)'; sel.style.color = 'var(--bad-text)';
+  }
+}
+
+function renderPart4Matching(part, prefix, startNum) {
+  let html = `<div class="passage">${part.passage}</div>`;
+  html += '<div class="match-options-box"><b>Các lựa chọn:</b><br>';
+  part.options.forEach(o => {
+    html += `<div class="opt-line"><b>${o.key}.</b> ${escapeHtml(o.text)}</div>`;
+  });
+  html += '</div>';
+
+  for (let n = startNum; n < startNum + 5; n++) {
+    const qid = `${prefix}-g${n}`;
+    const correctKey = part.answers[n];
+    let optionsHTML = '<option value="">-- Chọn đáp án --</option>';
+    part.options.forEach(o => {
+      optionsHTML += `<option value="${o.key}">${o.key} - ${escapeHtml(o.text)}</option>`;
+    });
+    html += `<div class="q-card" id="card-${qid}">
+               <div class="q-text">Câu <span class="q-num">${n}</span></div>`;
+    if (currentMode === 'practice') {
+      html += `<select class="dropdown-ans" data-correct="${correctKey}" onchange="checkDropdown(this)">${optionsHTML}</select>
+               <div class="ans-box ans-reveal" id="ans-${qid}">Đáp án đúng: ${correctKey} - ${escapeHtml(part.options.find(o=>o.key===correctKey).text)}</div>`;
+    } else {
+      html += `<select class="dropdown-ans" data-qid="${qid}" data-correct="${correctKey}">${optionsHTML}</select>
+               <div class="ans-box" id="ans-${qid}"></div>`;
+    }
+    html += `</div>`;
+  }
+  return html;
+}
+
+function render() {
+  clearInterval(timerInterval);
+  container.innerHTML = '';
+  container.classList.remove('revealed-mode');
+  isAnswerRevealed = false;
+  const toggleBtn = document.getElementById('btn-toggle-answers');
+  toggleBtn.classList.remove('active');
+  toggleBtn.innerHTML = '👁️ Xem đáp án';
+
+  const submitBtn = document.getElementById('btn-submit');
+  const timerEl = document.getElementById('timer');
+  const floatingControls = document.getElementById('floating-controls');
+
+  if (currentMode === 'test') {
+    submitBtn.style.display = 'block';
+    timerEl.style.display = 'inline-block';
+    floatingControls.style.display = 'none';
+    startTimer(45 * 60);
+  } else {
+    submitBtn.style.display = 'none';
+    timerEl.style.display = 'none';
+    floatingControls.style.display = 'flex';
+  }
+
+  if (currentSkill === 'reading') renderReading();
+  else renderListening();
+}
+
+function renderReading() {
+  const d = EXAM_DATA.reading[currentTest];
+  let html = '';
+
+  html += `<div class="part-title">PART 1 (Câu 1-5)</div>`;
+  d.part1.forEach((q, i) => {
+    html += renderMCQ(`r${currentTest}-p1-${i}`, `Câu <span class="q-num">${i+1}</span>. ${escapeHtml(q.q)}`, q.opts, q.correct);
+  });
+
+  html += `<div class="part-title">PART 2 (Câu 6-10)</div>`;
+  html += renderMatching(d.part2, `r${currentTest}-p2`);
+
+  html += `<div class="part-title">PART 3 (Câu 11-15)</div>`;
+  d.part3.forEach((q, i) => {
+    html += renderMCQ(`r${currentTest}-p3-${i}`, `Câu <span class="q-num">${i+11}</span>. ${escapeHtml(q.q)}`, q.opts, q.correct);
+  });
+
+  html += `<div class="part-title">PART 4 (Câu 16-20)</div>`;
+  html += renderPart4Matching(d.part4, `r${currentTest}-p4`, 16);
+
+  html += `<div class="part-title">PART 5 (Câu 21-26)</div>`;
+  html += `<div class="passage">${d.part5.passage}</div>`;
+  d.part5.questions.forEach((q, i) => {
+    html += renderGapFill(`r${currentTest}-p5-${i}`, 21 + i, q.opts, q.correct);
+  });
+
+  html += `<div class="part-title">PART 6 (Câu 27-32)</div>`;
+  html += `<div class="passage">${d.part6.passage}</div>`;
+  d.part6.answers.forEach((ans, i) => {
+    html += renderTextAnswer(`r${currentTest}-p6-${i}`, `Câu <span class="q-num">${27+i}</span>.`, ans);
+  });
+
+  container.innerHTML = html;
+}
+
+function renderListening() {
+  const d = EXAM_DATA.listening[currentTest];
+  let html = '';
+
+  html += `<div class="part-title">PART 1 (Câu 1-7)</div>`;
+  d.part1.forEach((q, i) => {
+    html += renderMCQ(`l${currentTest}-p1-${i}`, `Câu <span class="q-num">${i+1}</span>. ${escapeHtml(q.q)}`, q.opts, q.correct);
+  });
+
+  html += `<div class="part-title">PART 2 (Câu 8-13)</div>`;
+  d.part2.forEach((q, i) => {
+    html += renderMCQ(`l${currentTest}-p2-${i}`, `Câu <span class="q-num">${i+8}</span>. ${escapeHtml(q.q)}`, q.opts, q.correct);
+  });
+
+  html += `<div class="part-title">PART 3 (Câu 14-19)</div>`;
+  html += `<div class="p3-intro">${escapeHtml(d.part3.intro)}</div>`;
+  d.part3.items.forEach((it, i) => {
+    html += renderTextAnswer(`l${currentTest}-p3-${i}`, escapeHtml(it.q).replace(/\((\d+)\)/, '<b>($1)</b>'), it.ans);
+  });
+
+  html += `<div class="part-title">PART 4 (Câu 20-25)</div>`;
+  html += `<div class="p3-intro">${escapeHtml(d.part4.intro)}</div>`;
+  d.part4.items.forEach((q, i) => {
+    html += renderMCQ(`l${currentTest}-p4-${i}`, `Câu <span class="q-num">${i+20}</span>. ${escapeHtml(q.q)}`, q.opts, q.correct);
+  });
+
+  container.innerHTML = html;
+}
+
+function startTimer(duration) {
+  let timer = duration;
+  const display = document.getElementById('timer');
+  timerInterval = setInterval(() => {
+    const m = Math.floor(timer / 60), s = timer % 60;
+    display.textContent = (m < 10 ? '0' : '') + m + ':' + (s < 10 ? '0' : '') + s;
+    if (--timer < 0) { clearInterval(timerInterval); submitTest(); }
+  }, 1000);
+}
+
+function submitTest() {
+  clearInterval(timerInterval);
+  let score = 0, total = 0;
+
+  // Radio MCQ
+  container.querySelectorAll('input[type=radio]').forEach(inp => {
+    // handled per group below to avoid double counting
+  });
+
+  const radioGroups = {};
+  container.querySelectorAll('input[type=radio]').forEach(inp => {
+    radioGroups[inp.name] = radioGroups[inp.name] || [];
+    radioGroups[inp.name].push(inp);
+  });
+
+  Object.keys(radioGroups).forEach(name => {
+    total++;
+    const inputs = radioGroups[name];
+    const card = inputs[0].closest('.q-card');
+    const opts = card.querySelectorAll('.opt');
+    let correctIdx = -1;
+    opts.forEach((o, idx) => {
+      // determine correct via stored data on the radio's onchange context is not available;
+      // instead re-derive from original data using stored index attr
+    });
+  });
+
+  // Because correctIndex isn't stored in test mode DOM, recompute by re-reading EXAM_DATA via id pattern
+  score = 0; total = 0;
+  const skillData = currentSkill === 'reading' ? EXAM_DATA.reading[currentTest] : EXAM_DATA.listening[currentTest];
+
+  function gradeMCQList(list, prefix) {
+    list.forEach((q, i) => {
+      total++;
+      const qid = `${prefix}-${i}`;
+      const card = document.getElementById(`card-${qid}`);
+      if (!card) return;
+      const selected = card.querySelector(`input[name="${qid}"]:checked`);
+      const opts = card.querySelectorAll('.opt');
+      opts.forEach((opt, idx) => {
+        if (idx === q.correct) { opt.style.background = 'var(--ok-bg)'; opt.style.borderColor = 'var(--ok-border)'; }
+        else if (selected && parseInt(selected.value) === idx) { opt.style.background = 'var(--bad-bg)'; opt.style.borderColor = 'var(--bad-border)'; }
+      });
+      if (selected && parseInt(selected.value) === q.correct) score++;
+    });
+  }
+
+  function gradeTextList(items, prefix, getAns) {
+    items.forEach((it, i) => {
+      total++;
+      const qid = `${prefix}-${i}`;
+      const card = document.getElementById(`card-${qid}`);
+      if (!card) return;
+      const input = card.querySelector(`input[data-qid="${qid}"]`);
+      const ansBox = document.getElementById(`ans-${qid}`);
+      const correctAns = getAns(it);
+      ansBox.textContent = `Đáp án: ${correctAns}`;
+      ansBox.classList.add('show');
+      if (input) {
+        const userVal = input.value.trim().toLowerCase();
+        const sysVal = correctAns.toLowerCase();
+        input.disabled = true;
+        if (userVal && (sysVal.includes(userVal) || userVal.includes(sysVal))) {
+          input.style.borderColor = 'var(--ok-border)'; input.style.background = 'var(--ok-bg)';
+          score++;
+        } else {
+          input.style.borderColor = 'var(--bad-border)'; input.style.background = 'var(--bad-bg)';
+        }
+      }
+    });
+  }
+
+  function gradeDropdownList(selector, prefix) {
+    document.querySelectorAll(`select[data-qid^="${prefix}"]`).forEach(sel => {
+      total++;
+      const correct = sel.getAttribute('data-correct');
+      const ansBox = document.getElementById(`ans-${sel.getAttribute('data-qid')}`);
+      sel.disabled = true;
+      if (sel.value === correct) {
+        sel.style.borderColor = 'var(--ok-border)'; sel.style.background = 'var(--ok-bg)';
+        score++;
+      } else {
+        sel.style.borderColor = 'var(--bad-border)'; sel.style.background = 'var(--bad-bg)';
+      }
+      if (ansBox) { ansBox.textContent = `Đáp án đúng: ${correct}`; ansBox.classList.add('show'); }
+    });
+  }
+
+  if (currentSkill === 'reading') {
+    const d = skillData;
+    gradeMCQList(d.part1, `r${currentTest}-p1`);
+    gradeDropdownList(null, `r${currentTest}-p2-m`);
+    gradeMCQList(d.part3, `r${currentTest}-p3`);
+    gradeDropdownList(null, `r${currentTest}-p4-g`);
+    gradeMCQList(d.part5.questions, `r${currentTest}-p5`);
+    gradeTextList(d.part6.answers.map(a=>({ans:a})), `r${currentTest}-p6`, it => it.ans);
+  } else {
+    const d = skillData;
+    gradeMCQList(d.part1, `l${currentTest}-p1`);
+    gradeMCQList(d.part2, `l${currentTest}-p2`);
+    gradeTextList(d.part3.items, `l${currentTest}-p3`, it => it.ans);
+    gradeMCQList(d.part4.items, `l${currentTest}-p4`);
+  }
+
+  document.getElementById('score-text').textContent = `${score} / ${total}`;
+  document.getElementById('score-detail').textContent = score === total ? 'Xuất sắc! 🎉' : (score / total >= 0.7 ? 'Khá tốt, cố gắng thêm!' : 'Cần luyện tập thêm nhé!');
+  document.getElementById('overlay').style.display = 'block';
+  document.getElementById('modal').style.display = 'block';
+  document.getElementById('btn-submit').style.display = 'none';
+}
+
+function closeModal() {
+  document.getElementById('overlay').style.display = 'none';
+  document.getElementById('modal').style.display = 'none';
+}
+
+function toggleAllAnswers() {
+  isAnswerRevealed = !isAnswerRevealed;
+  const btn = document.getElementById('btn-toggle-answers');
+  if (isAnswerRevealed) {
+    btn.classList.add('active');
+    btn.innerHTML = '🙈 Ẩn đáp án';
+    container.classList.add('revealed-mode');
+  } else {
+    btn.classList.remove('active');
+    btn.innerHTML = '👁️ Xem đáp án';
+    container.classList.remove('revealed-mode');
+  }
+
+  container.querySelectorAll('.opt[data-correct-idx="1"]').forEach(o => {
+    o.classList.toggle('revealed', isAnswerRevealed);
+  });
+  container.querySelectorAll('.ans-reveal').forEach(box => {
+    box.classList.toggle('show', isAnswerRevealed);
+  });
+  container.querySelectorAll('select.dropdown-ans').forEach(sel => {
+    if (isAnswerRevealed) {
+      sel.value = sel.getAttribute('data-correct');
+      checkDropdown(sel);
+    } else {
+      sel.value = '';
+      sel.style.borderColor = 'var(--border)'; sel.style.background = '#fff'; sel.style.color = 'var(--text)';
+    }
+  });
+}
+
+function resetAllAnswers() {
+  if (isAnswerRevealed) toggleAllAnswers();
+  container.querySelectorAll('.opt').forEach(o => {
+    o.classList.remove('correct-mark', 'wrong-mark', 'disabled', 'revealed');
+  });
+  container.querySelectorAll('select.dropdown-ans').forEach(sel => {
+    sel.value = ''; sel.style.borderColor = 'var(--border)'; sel.style.background = '#fff'; sel.style.color = 'var(--text)';
+  });
+  container.querySelectorAll('.ans-box').forEach(b => b.classList.remove('show'));
+}
+
+buildTestTabs();
+render();
+</script>
+</body>
+</html>
